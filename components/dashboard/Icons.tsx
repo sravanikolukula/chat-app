@@ -8,6 +8,8 @@ import {
     MoreVertical,
     CheckCheck,
     ChevronRight,
+    ChevronLeft,
+    Paperclip
 } from "lucide-react";
 
 export const Icons = {
@@ -19,5 +21,7 @@ export const Icons = {
     Video: Video,
     Dots: MoreVertical,
     DoubleCheck: CheckCheck,
-    ChevronRight: ChevronRight
+    ChevronRight: ChevronRight,
+    Back: ChevronLeft,
+    Paperclip: Paperclip
 };

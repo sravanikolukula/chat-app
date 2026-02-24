@@ -9,6 +9,7 @@ import { Button } from "../ui/button";
 
 interface ChatAreaProps {
     selectedConversation: Conversation | null;
+    onBack?: () => void;
 }
 
 const formatMessageTime = (timestamp: number) => {
@@ -32,7 +33,7 @@ const formatMessageTime = (timestamp: number) => {
     return `${date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}, ${timeStr}`;
 };
 
-const ChatArea = ({ selectedConversation }: ChatAreaProps) => {
+const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
     const [messageBody, setMessageBody] = useState("");
     const messages = useQuery(api.messages.list, selectedConversation ? { conversationId: selectedConversation._id } : "skip");
     const sendMessage = useMutation(api.messages.send);
@@ -63,7 +64,7 @@ const ChatArea = ({ selectedConversation }: ChatAreaProps) => {
 
     if (!selectedConversation) {
         return (
-            <main className="flex-1 bg-[var(--bg-chat)] flex flex-col items-center justify-center gap-6 p-8 overflow-hidden">
+            <main className="flex-1 bg-[var(--bg-chat)] md:flex flex-col items-center justify-center gap-6 p-8 overflow-hidden hidden h-full">
                 <div className="w-20 h-20 rounded-3xl bg-[var(--input)] flex items-center justify-center text-3xl shadow-xl shadow-black/5 animate-in fade-in zoom-in duration-500">
                     ✨
                 </div>
@@ -78,10 +79,18 @@ const ChatArea = ({ selectedConversation }: ChatAreaProps) => {
     const otherMember = selectedConversation.otherMember;
 
     return (
-        <main className="flex-1 bg-[var(--bg-chat)] flex flex-col h-full relative overflow-hidden">
+        <main className="flex-1 bg-[var(--bg-chat)] flex flex-col h-full relative overflow-hidden rounded-r-md w-full md:w-auto">
             {/* Header */}
             <header className="px-6 py-4 border-b border-[var(--border)] flex justify-between items-center bg-[var(--glass-bg)] backdrop-blur-md z-10 shrink-0">
                 <div className="flex items-center gap-4">
+                    {/* Back Button for Mobile */}
+                    <button
+                        onClick={onBack}
+                        className="md:hidden p-2 -ml-2 hover:bg-[var(--input)] rounded-full transition-colors text-[var(--text-primary)]"
+                    >
+                        <Icons.Back size={24} />
+                    </button>
+
                     <div className="relative">
                         <img
                             src={otherMember?.image || "https://i.pravatar.cc/150"}
@@ -159,25 +168,39 @@ const ChatArea = ({ selectedConversation }: ChatAreaProps) => {
             </div>
 
             {/* Input Area */}
-            <form onSubmit={handleSendMessage} className="p-6 bg-[var(--bg-chat)] flex gap-3 shrink-0">
-                <div className="flex-1 relative">
-                    <input
-                        type="text"
-                        placeholder="Type a message..."
-                        className="w-full px-5 py-3.5 rounded-2xl border border-[var(--border)] bg-[var(--input)] color-[var(--text-primary)] outline-none focus:border-[var(--accent)] transition-all duration-200"
-                        value={messageBody}
-                        onChange={(e) => setMessageBody(e.target.value)}
-                    />
-                </div>
-                <button
-                    type="submit"
-                    className="bg-[var(--accent)] text-[var(--accent-foreground)] px-6 rounded-full font-bold text-sm flex items-center gap-2 hover:translate-y-[-2px] active:translate-y-0 transition-all duration-200 disabled:opacity-50 disabled:translate-y-0"
-                    disabled={!messageBody.trim()}
+            <div className="p-6 bg-[var(--bg-chat)] shrink-0 flex justify-center">
+                <form
+                    onSubmit={handleSendMessage}
+                    className="w-full max-w-[800px] relative flex items-center group"
                 >
+                    <div className="flex-1 relative flex items-center">
+                        {/* File Attachment Button */}
+                        <button
+                            type="button"
+                            className="absolute left-4 p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors rounded-xl hover:bg-[var(--border)]/30 z-10"
+                        >
+                            <Icons.Paperclip size={20} />
+                        </button>
 
-                    <Icons.Send size={18} />
-                </button>
-            </form>
+                        <input
+                            type="text"
+                            placeholder="Type a message..."
+                            className="w-full pl-14 pr-14 py-4 rounded-[24px] border border-[var(--border)] bg-[var(--input)] text-[var(--text-primary)] outline-none focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent)]/5 transition-all duration-300 shadow-sm placeholder:text-[var(--text-muted)]/60"
+                            value={messageBody}
+                            onChange={(e) => setMessageBody(e.target.value)}
+                        />
+
+                        {/* Integrated Send Button */}
+                        <button
+                            type="submit"
+                            className="absolute right-2 p-2.5 bg-indigo-900 text-white rounded-[16px] hover:bg-indigo-700 active:scale-95 transition-all duration-200 disabled:opacity-30 disabled:hover:bg-indigo-600 disabled:active:scale-100 shadow-md shadow-indigo-500/20 z-10"
+                            disabled={!messageBody.trim()}
+                        >
+                            <Icons.Send size={18} className="translate-x-[1px]" />
+                        </button>
+                    </div>
+                </form>
+            </div>
         </main>
     );
 };
