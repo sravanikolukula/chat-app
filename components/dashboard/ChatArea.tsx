@@ -100,21 +100,26 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
     //         }
     //     }
     // }, [messages?.length]);
+    // Smart auto-scroll logic
     useEffect(() => {
         if (!messages || !scrollContainerRef.current) return;
 
         const container = scrollContainerRef.current;
-        const offset = 80; // tolerance
-        const isNearBottom =
-            container.scrollHeight - container.scrollTop <=
-            container.clientHeight + offset;
+        const offset = 100; // tolerance
+        const isNearBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + offset;
 
-        if (isNearBottom) {
+        const lastMessage = messages[messages.length - 1];
+        const isFromMe = lastMessage && lastMessage.senderId === currentUser?._id;
+
+        // Auto-scroll if I sent the message OR if I'm already at the bottom
+        if (isFromMe || isNearBottom) {
             scrollToBottom();
-        } else {
+            setShowScrollButton(false);
+        } else if (messages.length > 0) {
+            // Only show the button if a new message arrived while we were scrolled up
             setShowScrollButton(true);
         }
-    }, [messages?.length]);
+    }, [messages?.length, currentUser?._id]);
 
     useEffect(() => {
         scrollToBottom();
@@ -135,6 +140,8 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
                 messageType: "text",
             });
             setMessageBody("");
+            // Immediate scroll for better UX
+            setTimeout(scrollToBottom, 100);
         } catch (error) {
             console.error("Error sending message:", error);
         }
@@ -225,8 +232,9 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
                     fileName: file.name,
                     fileSize: (file.size / 1024 / 1024).toFixed(2) + " MB",
                 });
+                // Immediate scroll for better UX
+                setTimeout(scrollToBottom, 100);
             }
-
         } catch (error) {
             console.error("Error uploading file:", error);
         } finally {
@@ -413,26 +421,26 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
                                             </div>
                                         ) : msg.messageType === "file" ? (
                                             <div className="flex flex-col min-w-[240px]">
-                                                <div className={`flex items-center gap-3 ${isMe ? "bg-black/20" : "bg-zinc-100/80 dark:bg-zinc-800/50"} p-3 rounded-xl border ${isMe ? "border-white/10" : "border-black/5 dark:border-white/5"} backdrop-blur-sm shadow-inner transition-colors`}>
-                                                    <div className="w-10 h-10 rounded-lg bg-(--accent) flex items-center justify-center text-white shadow-sm">
-                                                        <Icons.File size={20} />
+                                                <div className={`flex items-center gap-3 ${isMe ? "bg-black/10 dark:bg-black/5" : "bg-black/20 dark:bg-white/5"} p-3 rounded-xl border ${isMe ? "border-white/10 dark:border-black/5" : "border-black/10 dark:border-white/10"} backdrop-blur-md shadow-lg transition-all hover:bg-opacity-80`}>
+                                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center shadow-sm ${isMe ? "bg-[var(--bubble-sent-text)] text-[var(--bubble-sent)]" : "bg-(--accent) text-(--accent-foreground)"}`}>
+                                                        <Icons.File size={20} strokeWidth={2.5} />
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <div className={`font-semibold truncate ${isMe ? "text-white" : "text-(--text-primary)"}`}>{msg.fileName}</div>
-                                                        <div className={`text-[10px] ${isMe ? "text-white/60" : "text-(--text-muted)"}`}>{msg.fileSize}</div>
+                                                        <div className={`font-bold text-[13px] truncate ${isMe ? "text-[var(--bubble-sent-text)]" : "text-(--text-primary)"}`}>{msg.fileName}</div>
+                                                        <div className={`text-[10px] font-medium tracking-wide ${isMe ? "text-[var(--bubble-sent-text)] opacity-60" : "text-(--text-muted)"}`}>{msg.fileSize}</div>
                                                     </div>
                                                     <a
                                                         href={msg.contentUrl}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         download={msg.fileName}
-                                                        className={`p-2 rounded-lg transition-all ${isMe ? "hover:bg-white/10 text-white/80 hover:text-white" : "hover:bg-black/5 dark:hover:bg-white/5 text-(--text-muted) hover:text-(--text-primary)"}`}
+                                                        className={`p-2 rounded-lg transition-all ${isMe ? "hover:bg-black/10 text-[var(--bubble-sent-text)] opacity-80 hover:opacity-100" : "hover:bg-black/10 dark:hover:bg-white/10 text-(--text-muted) hover:text-(--text-primary)"}`}
                                                     >
                                                         <Icons.Download size={18} />
                                                     </a>
                                                 </div>
                                                 {msg.body && msg.body !== `Sent a file: ${msg.fileName}` && (
-                                                    <span className={`px-4 py-2 ${isMe ? "text-white/90" : "text-(--text-primary)"}`}>{msg.body}</span>
+                                                    <span className={`px-4 py-2 font-medium ${isMe ? "text-[var(--bubble-sent-text)] opacity-95" : "text-(--text-primary)"}`}>{msg.body}</span>
                                                 )}
                                             </div>
                                         ) : (
