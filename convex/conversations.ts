@@ -85,6 +85,15 @@ export const list = query({
                     .order("desc")
                     .first();
 
+                const allMessages = await ctx.db
+                    .query("messages")
+                    .withIndex("by_conversationId", (q) => q.eq("conversationId", conv._id))
+                    .collect();
+
+                const unreadCount = allMessages.filter(
+                    (m) => !m.readBy.includes(user._id)
+                ).length;
+
                 return {
                     ...conv,
                     otherMember: otherMember ? {
@@ -92,6 +101,7 @@ export const list = query({
                         online: otherMember.online && (otherMember.lastSeen ? (now - otherMember.lastSeen < ONLINE_THRESHOLD) : false)
                     } : null,
                     lastMessage,
+                    unreadCount,
                 };
             })
         );

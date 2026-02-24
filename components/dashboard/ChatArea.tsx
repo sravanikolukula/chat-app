@@ -35,19 +35,51 @@ const formatMessageTime = (timestamp: number) => {
 
 const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
     const [messageBody, setMessageBody] = useState("");
+    const [showScrollButton, setShowScrollButton] = useState(false);
+    const [isAtBottom, setIsAtBottom] = useState(true);
     const messages = useQuery(api.messages.list, selectedConversation ? { conversationId: selectedConversation._id } : "skip");
     const sendMessage = useMutation(api.messages.send);
+    const markRead = useMutation(api.messages.markRead);
     const setTyping = useMutation(api.conversations.setTyping);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        setShowScrollButton(false);
     };
 
+    // Mark as read when conversation opens or new messages arrive
     useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+        if (selectedConversation?._id) {
+            markRead({ conversationId: selectedConversation._id });
+        }
+    }, [selectedConversation?._id, messages?.length, markRead]);
+
+    // Handle scroll awareness
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const target = e.currentTarget;
+        const offset = 100; // tolerance
+        const isBottom = target.scrollHeight - target.scrollTop <= target.clientHeight + offset;
+        setIsAtBottom(isBottom);
+        if (isBottom) setShowScrollButton(false);
+    };
+
+    // Smart auto-scroll
+    useEffect(() => {
+        if (messages === undefined) return;
+
+        if (isAtBottom) {
+            scrollToBottom();
+        } else {
+            // Check if last message is from someone else
+            const lastMessage = messages[messages.length - 1];
+            if (lastMessage && lastMessage.senderId === otherMember?._id) {
+                setShowScrollButton(true);
+            }
+        }
+    }, [messages?.length]);
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -134,7 +166,11 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
             </header>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-6 custom-scrollbar">
+            <div
+                ref={scrollContainerRef}
+                onScroll={handleScroll}
+                className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-6 custom-scrollbar relative"
+            >
                 {messages === undefined ? (
                     <div className="flex-1 flex flex-col items-center justify-center text-[var(--text-muted)] animate-pulse">
                         <Icons.Dots size={24} className="mb-2" />
@@ -185,6 +221,17 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
                     })
                 )}
                 <div ref={messagesEndRef} />
+
+                {/* Scroll Button */}
+                {showScrollButton && (
+                    <button
+                        onClick={scrollToBottom}
+                        className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[var(--accent)] text-[var(--accent-foreground)] px-4 py-2 rounded-full text-xs font-bold shadow-lg flex items-center gap-2 animate-bounce cursor-pointer z-20"
+                    >
+                        <Icons.Back size={14} className="rotate-270" />
+                        New messages ↓
+                    </button>
+                )}
             </div>
 
             {/* Typing Indicator */}
@@ -199,14 +246,6 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
                         </div>
 
                     </div>
-                    {/* <div className="flex items-center text-sm text-muted-foreground">
-                        is typing
-                        <div className="flex gap-1.5 ml-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--accent))] animate-zigzag"></span>
-                            <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--accent))] animate-zigzag [animation-delay:0.15s]"></span>
-                            <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--accent))] animate-zigzag [animation-delay:0.3s]"></span>
-                        </div>
-                    </div> */}
                 </div>
             )}
 

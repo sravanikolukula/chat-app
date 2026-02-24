@@ -16,6 +16,7 @@ export interface Conversation {
     otherMember?: User | null;
     lastMessage?: Message | null;
     typing?: Id<"users">[];
+    unreadCount: number;
 }
 
 export interface Message {

@@ -112,7 +112,14 @@ const Sidebar = ({ selectedId, onSelectConversation }: SidebarProps) => {
                                 </div>
 
                                 <div className="flex-1 overflow-hidden">
-                                    <div className="font-medium text-sm truncate">{conv.otherMember?.name}</div>
+                                    <div className="flex items-center justify-between gap-2">
+                                        <div className="font-medium text-sm truncate">{conv.otherMember?.name}</div>
+                                        {conv.unreadCount > 0 && selectedId !== conv._id && (
+                                            <div className="min-w-[18px] h-[18px] flex items-center justify-center bg-[hsl(var(--status-online))] text-white text-[9px] font-bold rounded-full px-1 shadow-sm animate-in zoom-in duration-300">
+                                                {conv.unreadCount}
+                                            </div>
+                                        )}
+                                    </div>
                                     <div className={`text-[11px] truncate ${selectedId === conv._id ? "opacity-80" : "text-[var(--text-muted)]"}`}>
                                         {conv.lastMessage?.body || "Start a conversation..."}
                                     </div>
