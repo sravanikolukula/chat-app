@@ -9,7 +9,9 @@ import {
     CheckCheck,
     ChevronRight,
     ChevronLeft,
-    Paperclip
+    Paperclip,
+    Copy,
+    Trash
 } from "lucide-react";
 
 export const Icons = {
@@ -23,5 +25,7 @@ export const Icons = {
     DoubleCheck: CheckCheck,
     ChevronRight: ChevronRight,
     Back: ChevronLeft,
-    Paperclip: Paperclip
+    Paperclip: Paperclip,
+    Copy: Copy,
+    Trash: Trash
 };

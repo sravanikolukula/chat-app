@@ -76,3 +76,72 @@ export const markRead = mutation({
         }
     },
 });
+
+export const remove = mutation({
+    args: {
+        messageId: v.id("messages"),
+    },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) throw new Error("Unauthorized");
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+            .unique();
+
+        if (!user) throw new Error("User not found");
+
+        const message = await ctx.db.get(args.messageId);
+        if (!message) throw new Error("Message not found");
+
+        if (message.senderId !== user._id) {
+            throw new Error("You can only delete your own messages");
+        }
+
+        await ctx.db.patch(args.messageId, {
+            deleted: true,
+        });
+    },
+});
+
+export const toggleReaction = mutation({
+    args: {
+        messageId: v.id("messages"),
+        emoji: v.string(),
+    },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) throw new Error("Unauthorized");
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+            .unique();
+
+        if (!user) throw new Error("User not found");
+
+        const message = await ctx.db.get(args.messageId);
+        if (!message) throw new Error("Message not found");
+
+        const currentReactions = message.reactions || [];
+        const existingReactionIndex = currentReactions.findIndex(
+            (r) => r.userId === user._id && r.emoji === args.emoji
+        );
+
+        let newReactions;
+        if (existingReactionIndex > -1) {
+            // Remove reaction
+            newReactions = currentReactions.filter((_, i) => i !== existingReactionIndex);
+        } else {
+            // Add reaction (allow only one of each emoji per user, but can have different emojis)
+            // Or maybe just one reaction per user total?
+            // "Clicking the same emoji again should remove the reaction."
+            newReactions = [...currentReactions, { userId: user._id, emoji: args.emoji }];
+        }
+
+        await ctx.db.patch(args.messageId, {
+            reactions: newReactions,
+        });
+    },
+});

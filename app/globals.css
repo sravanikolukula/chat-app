@@ -216,18 +216,57 @@ h3,
   animation: zigzag 0.8s ease-in-out infinite;
 }
 
-@keyframes float {
+@keyframes zigzag {
 
   0%,
   100% {
-    transform: translateY(0);
+    transform: translateY(0px);
+  }
+
+  25% {
+    transform: translateY(-4px);
   }
 
   50% {
-    transform: translateY(-3px);
+    transform: translateY(2px);
+  }
+
+  75% {
+    transform: translateY(-2px);
   }
 }
 
-.animate-float {
-  animation: float 2s ease-in-out infinite;
+.animate-zigzag {
+  animation: zigzag 0.8s ease-in-out infinite;
+}
+
+/* .custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 10px;
+} */
+
+
+
+
+/* Smooth thin scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
 }

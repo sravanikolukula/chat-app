@@ -38,7 +38,10 @@ const Sidebar = ({ selectedId, onSelectConversation }: SidebarProps) => {
     };
 
     return (
-        <aside className="bg-[var(--bg-sidebar)] border-r border-[var(--border)] flex flex-col p-6 transition-all duration-300 ease-in-out rounded-l-md h-full">
+        // <aside className="bg-[var(--bg-sidebar)] border-r border-[var(--border)] flex flex-col p-6 transition-all duration-300 ease-in-out rounded-l-md h-full">
+        <aside className="bg-[var(--bg-sidebar)] border-r border-[var(--border)]
+                 flex flex-col p-6 rounded-l-md
+                 h-full min-h-0 ">
             {/* Header */}
             <div className="mb-8 flex justify-between items-center">
                 <h1 className="text-2xl font-bold text-[var(--accent)] tracking-tight">ChitChat</h1>

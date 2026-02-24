@@ -24,5 +24,9 @@ export default defineSchema({
         createdAt: v.number(),
         readBy: v.array(v.id("users")),
         deleted: v.optional(v.boolean()),
+        reactions: v.optional(v.array(v.object({
+            userId: v.id("users"),
+            emoji: v.string(),
+        }))),
     }).index("by_conversationId", ["conversationId"]),
 });

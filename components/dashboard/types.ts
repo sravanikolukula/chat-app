@@ -25,4 +25,9 @@ export interface Message {
     senderId: Id<"users">;
     body: string;
     createdAt: number;
+    deleted?: boolean;
+    reactions?: {
+        userId: Id<"users">;
+        emoji: string;
+    }[];
 }

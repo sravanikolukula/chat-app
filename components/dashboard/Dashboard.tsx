@@ -15,7 +15,7 @@ const Dashboard = () => {
     const selectedConversation = conversations?.find((c: any) => c._id === selectedId) || null;
 
     return (
-        <div className="flex md:grid md:grid-cols-[30%_70%] h-screen w-screen overflow-hidden bg-[var(--bg-main)] md:p-2">
+        <div className="grid grid-cols-1 md:grid md:grid-cols-[30%_70%]  w-screen min-h-screen bg-[var(--bg-main)] md:p-2">
             <div className={`${selectedId ? 'hidden md:block' : 'block'} w-full md:w-auto h-full`}>
                 <Sidebar
                     selectedId={selectedId}

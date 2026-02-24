@@ -7,6 +7,8 @@ import { Icons } from "./Icons";
 import { Conversation, Message } from "./types";
 import { Button } from "../ui/button";
 
+const EMOJIS = ["👍", "❤️", "😂", "😮", "😢"];
+
 interface ChatAreaProps {
     selectedConversation: Conversation | null;
     onBack?: () => void;
@@ -40,6 +42,8 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
     const messages = useQuery(api.messages.list, selectedConversation ? { conversationId: selectedConversation._id } : "skip");
     const sendMessage = useMutation(api.messages.send);
     const markRead = useMutation(api.messages.markRead);
+    const toggleReaction = useMutation(api.messages.toggleReaction);
+    const removeMessage = useMutation(api.messages.remove);
     const setTyping = useMutation(api.conversations.setTyping);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -58,28 +62,60 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
     }, [selectedConversation?._id, messages?.length, markRead]);
 
     // Handle scroll awareness
+    // const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    //     const target = e.currentTarget;
+    //     const offset = 100; // tolerance
+    //     const isBottom = target.scrollHeight - target.scrollTop <= target.clientHeight + offset;
+    //     setIsAtBottom(isBottom);
+    //     if (isBottom) setShowScrollButton(false);
+    // };
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         const target = e.currentTarget;
-        const offset = 100; // tolerance
-        const isBottom = target.scrollHeight - target.scrollTop <= target.clientHeight + offset;
+        const offset = 80;
+
+        const isBottom =
+            target.scrollHeight - target.scrollTop <=
+            target.clientHeight + offset;
+
         setIsAtBottom(isBottom);
-        if (isBottom) setShowScrollButton(false);
+
+        if (isBottom) {
+            setShowScrollButton(false);
+        }
     };
-
     // Smart auto-scroll
-    useEffect(() => {
-        if (messages === undefined) return;
+    // useEffect(() => {
+    //     if (messages === undefined) return;
 
-        if (isAtBottom) {
+    //     if (isAtBottom) {
+    //         scrollToBottom();
+    //     } else {
+    //         // Check if last message is from someone else
+    //         const lastMessage = messages[messages.length - 1];
+    //         if (lastMessage && lastMessage.senderId === otherMember?._id) {
+    //             setShowScrollButton(true);
+    //         }
+    //     }
+    // }, [messages?.length]);
+    useEffect(() => {
+        if (!messages || !scrollContainerRef.current) return;
+
+        const container = scrollContainerRef.current;
+        const offset = 80; // tolerance
+        const isNearBottom =
+            container.scrollHeight - container.scrollTop <=
+            container.clientHeight + offset;
+
+        if (isNearBottom) {
             scrollToBottom();
         } else {
-            // Check if last message is from someone else
-            const lastMessage = messages[messages.length - 1];
-            if (lastMessage && lastMessage.senderId === otherMember?._id) {
-                setShowScrollButton(true);
-            }
+            setShowScrollButton(true);
         }
     }, [messages?.length]);
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [selectedConversation?._id]);
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -117,7 +153,7 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
     const otherMember = selectedConversation.otherMember;
 
     return (
-        <main className="flex-1 bg-[var(--bg-chat)] flex flex-col h-full relative overflow-hidden rounded-r-md w-full md:w-auto">
+        <main className="flex-1 bg-[var(--bg-chat)] flex flex-col h-full relative rounded-r-md w-full md:w-auto overflow-y-scroll">
             {/* Header */}
             <header className="px-6 py-4 border-b border-[var(--border)] flex justify-between items-center bg-[var(--glass-bg)] backdrop-blur-md z-10 shrink-0">
                 <div className="flex items-center gap-4">
@@ -169,7 +205,7 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
             <div
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-6 custom-scrollbar relative"
+                className="flex-1 h-[calc(100%-120%)] overflow-y-scroll px-6 py-6 flex flex-col gap-6 custom-scrollbar relative "
             >
                 {messages === undefined ? (
                     <div className="flex-1 flex flex-col items-center justify-center text-[var(--text-muted)] animate-pulse">
@@ -191,10 +227,21 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
                 ) : (
                     messages.map((msg: Message) => {
                         const isMe = msg.senderId !== otherMember?._id;
+
+                        // Group reactions by emoji
+                        const reactionCounts = (msg.reactions || []).reduce((acc: any, curr) => {
+                            acc[curr.emoji] = (acc[curr.emoji] || 0) + 1;
+                            return acc;
+                        }, {});
+
+                        const handleCopy = () => {
+                            navigator.clipboard.writeText(msg.body);
+                        };
+
                         return (
                             <div
                                 key={msg._id}
-                                className={`flex gap-3 max-w-[85%] items-end animate-in fade-in duration-300 ${isMe ? "self-end flex-row-reverse" : "self-start flex-row"}`}
+                                className={`flex gap-3 max-w-[85%] items-end group/msg relative animate-in fade-in duration-300 ${isMe ? "self-end flex-row-reverse" : "self-start flex-row"}`}
                             >
                                 <div className="shrink-0 mb-1">
                                     {isMe ? (
@@ -203,17 +250,68 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
                                         <img
                                             src={otherMember?.image || "https://i.pravatar.cc/150"}
                                             alt=""
-                                            className="w-7 h-7 rounded-full object-cover bg-[var(--border)]"
+                                            className="w-7 h-7 rounded-full object-cover bg-(--border)"
                                         />
                                     )}
                                 </div>
-                                <div className={`flex flex-col gap-1 ${isMe ? "items-end" : "items-start"}`}>
-                                    <div className={`px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed shadow-sm ${isMe ? "bg-[var(--bubble-sent)] text-[var(--bubble-sent-text)] rounded-br-none" : "bg-[var(--bubble-received)] text-[var(--bubble-received-text)] rounded-bl-none"}`}>
-                                        {msg.body}
+                                <div className={`flex flex-col gap-1 ${isMe ? "items-end" : "items-start"} relative`}>
+                                    {/* Action Bar on Hover */}
+                                    {!msg.deleted && (
+                                        <div className={`absolute top-0 transform -translate-y-full opacity-0 group-hover/msg:opacity-100 transition-all duration-200 z-30 flex items-center bg-(--bg-sidebar) border border-(--border) rounded-lg shadow-xl px-1 py-1 gap-1 mb-1 ${isMe ? "right-0" : "left-0"}`}>
+                                            <div className="flex items-center">
+                                                {EMOJIS.map(emoji => (
+                                                    <button
+                                                        key={emoji}
+                                                        onClick={() => toggleReaction({ messageId: msg._id, emoji })}
+                                                        className={`p-1 hover:bg-(--border) rounded transition-colors text-sm ${(msg.reactions || []).some(r => r.userId !== otherMember?._id && r.emoji === emoji) ? "bg-(--border)" : ""}`}
+                                                    >
+                                                        {emoji}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <div className="w-px h-4 bg-[var(--border)] mx-1" />
+                                            <button
+                                                onClick={handleCopy}
+                                                className="p-1.5 hover:bg-[var(--border)] rounded transition-colors text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                                                title="Copy text"
+                                            >
+                                                <Icons.Copy size={13} />
+                                            </button>
+                                            {isMe && (
+                                                <button
+                                                    onClick={() => removeMessage({ messageId: msg._id })}
+                                                    className="p-1.5 hover:bg-red-500/10 rounded transition-colors text-[var(--text-muted)] hover:text-red-500"
+                                                    title="Delete message"
+                                                >
+                                                    <Icons.Trash size={13} />
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    <div className={`px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed shadow-sm transition-all ${msg.deleted ? "bg-zinc-100 dark:bg-zinc-900 text-zinc-400 italic border border-zinc-200 dark:border-zinc-800" : isMe ? "bg-[var(--bubble-sent)] text-[var(--bubble-sent-text)] rounded-br-none" : "bg-[var(--bubble-received)] text-[var(--bubble-received-text)] rounded-bl-none"}`}>
+                                        {msg.deleted ? "This message was deleted" : msg.body}
                                     </div>
+
+                                    {/* Reaction Badges */}
+                                    {Object.keys(reactionCounts).length > 0 && !msg.deleted && (
+                                        <div className={`flex flex-wrap gap-1 mt-1 ${isMe ? "justify-end" : "justify-start"}`}>
+                                            {Object.entries(reactionCounts).map(([emoji, count]: [string, any]) => (
+                                                <button
+                                                    key={emoji}
+                                                    onClick={() => toggleReaction({ messageId: msg._id, emoji })}
+                                                    className="flex items-center gap-1 bg-(--bg-sidebar) border border-(--border) rounded-full px-1.5 py-0.5 text-[10px] hover:bg-(--border) transition-colors"
+                                                >
+                                                    <span>{emoji}</span>
+                                                    <span className="font-bold text-[var(--text-muted)]">{count}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+
                                     <div className="text-[9px] text-[var(--text-muted)] mt-0.5 flex items-center gap-1.5 uppercase font-medium tracking-wider">
                                         {formatMessageTime(msg.createdAt)}
-                                        {isMe && <Icons.DoubleCheck size={12} className="text-[var(--status-online)]" />}
+                                        {isMe && !msg.deleted && <Icons.DoubleCheck size={12} className="text-[var(--status-online)]" />}
                                     </div>
                                 </div>
                             </div>
@@ -223,13 +321,26 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
                 <div ref={messagesEndRef} />
 
                 {/* Scroll Button */}
-                {showScrollButton && (
+                {/* {showScrollButton && (
                     <button
                         onClick={scrollToBottom}
                         className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[var(--accent)] text-[var(--accent-foreground)] px-4 py-2 rounded-full text-xs font-bold shadow-lg flex items-center gap-2 animate-bounce cursor-pointer z-20"
                     >
                         <Icons.Back size={14} className="rotate-270" />
                         New messages ↓
+                    </button>
+                )} */}
+                {showScrollButton && (
+                    <button
+                        onClick={scrollToBottom}
+                        className="absolute bottom-6 left-1/2 -translate-x-1/2
+                            bg-[var(--accent)] text-[var(--accent-foreground)]
+                            px-4 py-2 rounded-full text-xs font-semibold
+                            shadow-xl shadow-black/10 backdrop-blur-md
+                            animate-in fade-in slide-in-from-bottom-4
+                            hover:scale-105 active:scale-95 transition-all duration-200 z-20"
+                    >
+                        ↓ New messages
                     </button>
                 )}
             </div>
@@ -250,7 +361,7 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
             )}
 
             {/* Input Area */}
-            <div className="p-6 bg-[var(--bg-chat)] shrink-0 flex justify-center">
+            <div className="p-6 bg-(--bg-chat) shrink-0 flex justify-center">
                 <form
                     onSubmit={handleSendMessage}
                     className="w-full max-w-[800px] relative flex items-center group"

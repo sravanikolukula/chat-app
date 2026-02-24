@@ -33,8 +33,7 @@ export default function Home() {
     // <div className="test-red" style={{ backgroundColor: 'red', height: '100vh', display: 'flex', alignItems: 'center', justifyCenter: 'center', color: 'white', fontSize: '5rem', fontWeight: 'bold' }}>
     //   hello from inline!
     // </div>
-    <div className="min-h-screen flex items-center justify-center">
-      <Dashboard />
-    </div>
+    <Dashboard />
+
   );
 }
