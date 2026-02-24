@@ -51,6 +51,8 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [sendError, setSendError] = useState<string | null>(null);
+    const [lastAttemptedMessage, setLastAttemptedMessage] = useState<string>("");
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -127,24 +129,40 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!messageBody.trim() || !selectedConversation) return;
+        const bodyToSend = messageBody.trim();
+        if (!bodyToSend || !selectedConversation) return;
 
+        setSendError(null);
         try {
+            if (!window.navigator.onLine) {
+                throw new Error("Offline");
+            }
             if (typingTimeoutRef.current) {
                 clearTimeout(typingTimeoutRef.current);
                 setTyping({ conversationId: selectedConversation._id, isTyping: false });
             }
             await sendMessage({
                 conversationId: selectedConversation._id,
-                body: messageBody,
+                body: bodyToSend,
                 messageType: "text",
             });
             setMessageBody("");
             // Immediate scroll for better UX
             setTimeout(scrollToBottom, 100);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error sending message:", error);
+            if (!window.navigator.onLine || error.message === "Offline") {
+                setSendError("No internet connection. Please check your network and try again.");
+            } else {
+                setSendError("Message failed to send. Click to retry.");
+            }
+            setLastAttemptedMessage(bodyToSend);
         }
+    };
+
+    const handleRetry = () => {
+        setMessageBody(lastAttemptedMessage);
+        setSendError(null);
     };
 
     // const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -315,9 +333,15 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
                 className="flex-1 min-h-0 overflow-y-auto px-6 py-6 flex flex-col gap-6 custom-scrollbar relative"
             >
                 {messages === undefined ? (
-                    <div className="flex-1 flex flex-col items-center justify-center text-[var(--text-muted)] animate-pulse">
-                        <Icons.Dots size={24} className="mb-2" />
-                        <span className="text-xs font-medium">Loading messages...</span>
+                    <div className="flex flex-col gap-6">
+                        {[1, 2, 3, 4].map((i) => (
+                            <div key={i} className={`flex ${i % 2 === 0 ? "justify-end" : "justify-start"} animate-pulse`}>
+                                <div className="flex gap-2 max-w-[70%]">
+                                    {i % 2 !== 0 && <div className="w-8 h-8 rounded-full bg-(--input) shrink-0 mt-auto" />}
+                                    <div className={`h-12 w-48 bg-(--input) rounded-2xl ${i % 2 === 0 ? "rounded-br-none" : "rounded-bl-none"}`} />
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 ) : messages.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center text-center px-12">
@@ -514,6 +538,19 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
                     </div>
                 </div>
             )}
+            {/* Send Error */}
+            {sendError && (
+                <div
+                    onClick={handleRetry}
+                    className="mx-6 mb-2 py-2 px-4 bg-red-500/10 border border-red-500/20 text-red-500 text-[11px] font-medium rounded-lg flex items-center justify-between cursor-pointer hover:bg-red-500/15 transition-all animate-in fade-in slide-in-from-bottom-2"
+                >
+                    <div className="flex items-center gap-2">
+                        <Icons.Dots className="w-3 h-3" />
+                        {sendError}
+                    </div>
+                    <span className="underline uppercase tracking-wider text-[9px]">Retry</span>
+                </div>
+            )}
 
             {/* Input Area */}
             <div className="p-6 bg-(--bg-chat) shrink-0 flex justify-center">
@@ -563,7 +600,7 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
                         {/* Integrated Send Button */}
                         <button
                             type="submit"
-                            className="absolute right-2 p-2.5 bg-indigo-900 text-white rounded-[16px] hover:bg-indigo-700 active:scale-95 transition-all duration-200 disabled:opacity-30 disabled:hover:bg-indigo-600 disabled:active:scale-100 shadow-md shadow-indigo-500/20 z-10"
+                            className="absolute right-2 p-2.5 bg-indigo-700 text-white rounded-[16px] hover:bg-indigo-700 active:scale-95 transition-all duration-200 disabled:opacity-30 disabled:hover:bg-indigo-600 disabled:active:scale-100 shadow-md shadow-indigo-500/20 z-10"
                             disabled={!messageBody.trim()}
                         >
                             <Icons.Send size={18} className="translate-x-[1px]" />

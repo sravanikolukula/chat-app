@@ -94,9 +94,16 @@ const Sidebar = ({ selectedId, onSelectConversation }: SidebarProps) => {
             <div className="flex-1 overflow-y-auto min-h-0 flex flex-col gap-2 custom-scrollbar">
                 {activeTab === "conversations" ? (
                     conversations === undefined ? (
-                        <div className="flex flex-col items-center justify-center h-32 text-[var(--text-muted)] animate-pulse">
-                            <Icons.Dots size={24} className="mb-2" />
-                            <span className="text-xs font-medium">Loading chats...</span>
+                        <div className="flex flex-col gap-2">
+                            {[1, 2, 3, 4, 5].map((i) => (
+                                <div key={i} className="flex items-center gap-3 p-3 animate-pulse">
+                                    <div className="w-10 h-10 rounded-full bg-[var(--input)]" />
+                                    <div className="flex-1">
+                                        <div className="h-3 bg-[var(--input)] rounded w-24 mb-2" />
+                                        <div className="h-2 bg-[var(--input)] rounded w-full opacity-60" />
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     ) : conversations.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-48 text-center px-6">
@@ -142,9 +149,16 @@ const Sidebar = ({ selectedId, onSelectConversation }: SidebarProps) => {
                     )
                 ) : (
                     filteredUsers === undefined ? (
-                        <div className="flex flex-col items-center justify-center h-32 text-[var(--text-muted)] animate-pulse">
-                            <Icons.Dots size={24} className="mb-2" />
-                            <span className="text-xs font-medium">Searching users...</span>
+                        <div className="flex flex-col gap-2">
+                            {[1, 2, 3, 4, 5].map((i) => (
+                                <div key={i} className="flex items-center gap-3 p-3 animate-pulse">
+                                    <div className="w-10 h-10 rounded-full bg-[var(--input)]" />
+                                    <div className="flex-1">
+                                        <div className="h-3 bg-[var(--input)] rounded w-24 mb-2" />
+                                        <div className="h-2 bg-[var(--input)] rounded w-32 opacity-60" />
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     ) : filteredUsers.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-48 text-center px-6">
