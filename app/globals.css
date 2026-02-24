@@ -86,6 +86,11 @@
   --primary: var(--accent);
   --primary-foreground: var(--accent-foreground);
   --ring: var(--accent);
+
+  --status-online: 142 76% 36%;
+  /* green */
+  --status-offline: 25 95% 53%;
+  /* orange */
 }
 
 [data-theme='dark'] {
@@ -125,6 +130,11 @@
   --primary: var(--accent);
   --primary-foreground: var(--accent-foreground);
   --ring: var(--accent);
+
+  --status-online: 142 70% 50%;
+  /* brighter green for dark */
+  --status-offline: 25 90% 60%;
+  /* brighter orange for dark */
 }
 
 * {

@@ -71,6 +71,9 @@ export const list = query({
             conv.members.includes(user._id)
         );
 
+        const now = Date.now();
+        const ONLINE_THRESHOLD = 60000; // 60 seconds
+
         const results = await Promise.all(
             myConversations.map(async (conv) => {
                 const otherMemberId = conv.members.find((id) => id !== user._id);
@@ -84,7 +87,10 @@ export const list = query({
 
                 return {
                     ...conv,
-                    otherMember,
+                    otherMember: otherMember ? {
+                        ...otherMember,
+                        online: otherMember.online && (otherMember.lastSeen ? (now - otherMember.lastSeen < ONLINE_THRESHOLD) : false)
+                    } : null,
                     lastMessage,
                 };
             })

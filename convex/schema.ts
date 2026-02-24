@@ -7,6 +7,7 @@ export default defineSchema({
         name: v.string(),
         image: v.string(),
         online: v.boolean(),
+        lastSeen: v.optional(v.number()),
     }).index("by_clerkId", ["clerkId"]),
 
     conversations: defineTable({

@@ -6,14 +6,15 @@ import { api } from "@/convex/_generated/api";
 import { Icons } from "./Icons";
 import { User, Conversation } from "./types";
 import { ModeToggle } from "@/components/mode-toggle";
+import { Id } from "@/convex/_generated/dataModel";
 import { UserButton } from "@clerk/nextjs";
 
 interface SidebarProps {
-    selectedConversation: Conversation | null;
+    selectedId: Id<"conversations"> | null;
     onSelectConversation: (conv: Conversation) => void;
 }
 
-const Sidebar = ({ selectedConversation, onSelectConversation }: SidebarProps) => {
+const Sidebar = ({ selectedId, onSelectConversation }: SidebarProps) => {
     const [activeTab, setActiveTab] = useState<"conversations" | "users">("conversations");
     const [searchTerm, setSearchTerm] = useState("");
 
@@ -99,7 +100,7 @@ const Sidebar = ({ selectedConversation, onSelectConversation }: SidebarProps) =
                             <div
                                 key={conv._id}
                                 onClick={() => onSelectConversation(conv)}
-                                className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors duration-200 group ${selectedConversation?._id === conv._id ? "bg-[var(--accent)] text-[var(--accent-foreground)]" : "hover:bg-[var(--input)]"}`}
+                                className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors duration-200 group ${selectedId === conv._id ? "bg-[var(--accent)] text-[var(--accent-foreground)]" : "hover:bg-[var(--input)]"}`}
                             >
                                 <div className="relative">
                                     <img
@@ -107,12 +108,12 @@ const Sidebar = ({ selectedConversation, onSelectConversation }: SidebarProps) =
                                         alt={conv.otherMember?.name}
                                         className="w-10 h-10 rounded-full object-cover bg-[var(--border)]"
                                     />
-                                    <div className={`absolute bottom-[-2px] right-[-2px] w-3 h-3 rounded-full border-2 border-[var(--bg-sidebar)] ${conv.otherMember?.online ? "bg-[var(--status-online)]" : "bg-[var(--status-offline)]"}`}></div>
+                                    <div className={`absolute bottom-[-2px] right-[-2px] w-3 h-3 rounded-full border-2 ${conv.otherMember?.online ? "bg-[hsl(var(--status-online))] border-[var(--bg-sidebar)]" : "bg-transparent border-[var(--border)]"}`}></div>
                                 </div>
 
                                 <div className="flex-1 overflow-hidden">
                                     <div className="font-medium text-sm truncate">{conv.otherMember?.name}</div>
-                                    <div className={`text-[11px] truncate ${selectedConversation?._id === conv._id ? "opacity-80" : "text-[var(--text-muted)]"}`}>
+                                    <div className={`text-[11px] truncate ${selectedId === conv._id ? "opacity-80" : "text-[var(--text-muted)]"}`}>
                                         {conv.lastMessage?.body || "Start a conversation..."}
                                     </div>
                                 </div>
@@ -148,7 +149,7 @@ const Sidebar = ({ selectedConversation, onSelectConversation }: SidebarProps) =
                                         alt={user.name}
                                         className="w-10 h-10 rounded-full object-cover bg-[var(--border)]"
                                     />
-                                    <div className={`absolute bottom-[-2px] right-[-2px] w-3 h-3 rounded-full border-2 border-[var(--bg-sidebar)] ${user.online ? "bg-[var(--status-online)]" : "bg-[var(--status-offline)]"}`}></div>
+                                    <div className={`absolute bottom-[-2px] right-[-2px] w-3 h-3 rounded-full border-2 ${user.online ? "bg-[hsl(var(--status-online))] border-[var(--bg-sidebar)]" : "bg-transparent border-[var(--border)]"}`}></div>
                                 </div>
 
                                 <div className="flex-1 overflow-hidden">

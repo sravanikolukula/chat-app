@@ -23,7 +23,28 @@ export const syncUser = mutation({
             name: args.name,
             image: args.image,
             online: true,
+            lastSeen: Date.now(),
         });
+    },
+});
+
+export const updateStatus = mutation({
+    args: { online: v.boolean() },
+    handler: async (ctx: MutationCtx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) return;
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+            .unique();
+
+        if (user) {
+            await ctx.db.patch(user._id, {
+                online: args.online,
+                lastSeen: Date.now(),
+            });
+        }
     },
 });
 
@@ -58,18 +79,21 @@ export const list = query({
             .query("users")
             .collect();
 
-        console.log("Total users in DB:", users.length);
-        console.log("Current identity subject:", identity.subject);
+        const now = Date.now();
+        const ONLINE_THRESHOLD = 60000; // 60 seconds
 
-        const filteredUsers = users.filter((user) => user.clerkId !== identity.subject);
-        console.log("Users after filtering current user:", filteredUsers.length);
-        console.log("filteredUsers", filteredUsers);
+        const filteredUsers = users
+            .filter((user) => user.clerkId !== identity.subject)
+            .map((user) => ({
+                ...user,
+                online: user.online && (user.lastSeen ? (now - user.lastSeen < ONLINE_THRESHOLD) : false)
+            }));
+
         if (args.searchTerm) {
             return filteredUsers.filter((user) =>
                 user.name.toLowerCase().includes(args.searchTerm!.toLowerCase())
             );
         }
-        console.log("filteredUsers", filteredUsers);
         return filteredUsers;
     },
 });

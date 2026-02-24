@@ -97,12 +97,26 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
                             alt={otherMember?.name}
                             className="w-10 h-10 rounded-full object-cover bg-[var(--border)]"
                         />
-                        <div className={`absolute bottom-[-2px] right-[-2px] w-3 h-3 rounded-full border-2 border-[var(--bg-chat)] ${otherMember?.online ? "bg-[var(--status-online)]" : "bg-[var(--status-offline)]"}`}></div>
+                        {/* <div className={`absolute bottom-[-2px] right-[-2px] w-3 h-3 rounded-full border-2 border-[var(--bg-sidebar)] ${user.online ? "bg-[var(--status-online)]" : "bg-[var(--status-offline)]"}`}></div> */}
+                        {/* <div className={`absolute bottom-[-2px] right-[-2px] w-3 h-3 rounded-full border-2 ${otherMember?.online ? "bg-[hsl(var(--status-online))] border-gray-200" : "bg-transparent border-[var(--border)]"}`}></div> */}
+                        <div
+                            className={`absolute bottom-[-2px] right-[-2px] w-3 h-3 rounded-full border-2 transition-all
+    ${otherMember?.online
+                                    ? "bg-[hsl(var(--status-online))] border-background"
+                                    : "bg-transparent border-border border-gray-950 dark:border-gray-300"
+                                }
+  `}
+                        ></div>
                     </div>
                     <div>
                         <div className="font-semibold text-sm text-[var(--text-primary)]">{otherMember?.name}</div>
-                        <div className="text-[11px] text-[var(--status-online)] font-medium">
-                            {otherMember?.online ? "Online" : "Away"}
+                        <div
+                            className={`text-[11px] font-medium ${otherMember?.online
+                                ? "text-[hsl(var(--status-online))]"
+                                : "text-[hsl(var(--status-offline))]"
+                                }`}
+                        >
+                            {otherMember?.online ? "Online" : "Offline"}
                         </div>
                     </div>
                 </div>
