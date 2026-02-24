@@ -11,6 +11,27 @@ interface ChatAreaProps {
     selectedConversation: Conversation | null;
 }
 
+const formatMessageTime = (timestamp: number) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+
+    const isToday = date.toDateString() === now.toDateString();
+    const isSameYear = date.getFullYear() === now.getFullYear();
+
+    const timeOptions: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' };
+    const timeStr = date.toLocaleTimeString([], timeOptions);
+
+    if (isToday) {
+        return timeStr;
+    }
+
+    if (isSameYear) {
+        return `${date.toLocaleDateString([], { month: 'short', day: 'numeric' })}, ${timeStr}`;
+    }
+
+    return `${date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}, ${timeStr}`;
+};
+
 const ChatArea = ({ selectedConversation }: ChatAreaProps) => {
     const [messageBody, setMessageBody] = useState("");
     const messages = useQuery(api.messages.list, selectedConversation ? { conversationId: selectedConversation._id } : "skip");
@@ -108,7 +129,7 @@ const ChatArea = ({ selectedConversation }: ChatAreaProps) => {
                                     {msg.body}
                                 </div>
                                 <div className="text-[9px] text-[var(--text-muted)] mt-0.5 flex items-center gap-1.5 uppercase font-medium tracking-wider">
-                                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    {formatMessageTime(msg.createdAt)}
                                     {isMe && <Icons.DoubleCheck size={12} className="text-[var(--status-online)]" />}
                                 </div>
                             </div>
