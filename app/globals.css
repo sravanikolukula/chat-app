@@ -91,6 +91,7 @@
   /* green */
   --status-offline: 25 95% 53%;
   /* orange */
+  --toggle-border: hsl(0, 0%, 80%);
 }
 
 [data-theme='dark'] {
@@ -135,6 +136,7 @@
   /* brighter green for dark */
   --status-offline: 25 90% 60%;
   /* brighter orange for dark */
+  --toggle-border: hsl(0, 0%, 50%);
 }
 
 * {

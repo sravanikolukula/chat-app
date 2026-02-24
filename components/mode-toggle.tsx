@@ -37,7 +37,7 @@ export function ModeToggle() {
             // className="w-10 h-10 rounded-full duration-300 relative overflow-hidden group bg-background text-foreground"
             className="w-10 h-10 rounded-full
     bg-background text-foreground
-    border border-border
+    border border-[var(--toggle-border)]
     hover:bg-accent hover:text-accent-foreground
     focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
     transition-all duration-300"

@@ -290,7 +290,7 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
                         ></div>
                     </div>
                     <div>
-                        <div className="font-semibold text-sm text-[var(--text-primary)]">{otherMember?.name}</div>
+                        <div className="font-semibold text-md text-[var(--text-primary)]">{otherMember?.name}</div>
                         <div
                             className={`text-[11px] font-medium ${otherMember?.online
                                 ? "text-[hsl(var(--status-online))]"
