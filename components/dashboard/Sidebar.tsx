@@ -44,8 +44,18 @@ const Sidebar = ({ selectedId, onSelectConversation }: SidebarProps) => {
                  h-full min-h-0 overflow-hidden">
             {/* Header */}
             <div className="mb-8 flex justify-between items-center shrink-0">
-                <h1 className="text-2xl font-bold text-[var(--accent)] tracking-tight">ChitChat</h1>
-                <ModeToggle />
+                <h1 className="text-3xl font-bold text-[var(--accent)] tracking-tight">ChitChat</h1>
+                <div className="flex items-center gap-5">
+                    <ModeToggle />
+                    <UserButton
+                        afterSignOutUrl="/sign-in"
+                        appearance={{
+                            elements: {
+                                userButtonAvatarBox: "w-10 h-10"
+                            }
+                        }}
+                    />
+                </div>
             </div>
 
             {/* Search */}
@@ -174,12 +184,7 @@ const Sidebar = ({ selectedId, onSelectConversation }: SidebarProps) => {
                 )}
             </div>
 
-            {/* User Profile / Footer */}
-            <div className="mt-6 pt-4 border-t border-[var(--border)] shrink-0">
-                <div className="flex items-center gap-3 p-2 rounded-xl bg-[var(--input)]">
-                    <UserButton showName={true} />
-                </div>
-            </div>
+
         </aside>
     );
 };
