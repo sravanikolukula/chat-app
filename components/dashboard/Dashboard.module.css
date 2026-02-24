@@ -22,6 +22,7 @@
     flex-direction: column;
     height: 100%;
     position: relative;
+    overflow: hidden;
 }
 
 .rightPanel {
@@ -146,7 +147,7 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    border: 2px solid var(--bg-sidebar);
+    border: 2px solid var(--card-bg, white);
 }
 
 .online {
@@ -285,11 +286,13 @@
     font-weight: 600;
     cursor: pointer;
     transition: transform 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
 }
 
 .sendButton:hover {
     transform: translateY(-2px);
-    background: hsl(0, 0%, 90%);
+    opacity: 0.9;
 }
 
 /* Theme Switch */

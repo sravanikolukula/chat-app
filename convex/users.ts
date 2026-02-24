@@ -41,3 +41,43 @@ export const currentUser = query({
             .unique();
     },
 });
+
+export const list = query({
+
+    args: {
+        searchTerm: v.optional(v.string()),
+    },
+    handler: async (ctx: QueryCtx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            console.log("No identity found in Convex query");
+            return [];
+        }
+
+        const users = await ctx.db
+            .query("users")
+            .collect();
+
+        console.log("Total users in DB:", users.length);
+        console.log("Current identity subject:", identity.subject);
+
+        const filteredUsers = users.filter((user) => user.clerkId !== identity.subject);
+        console.log("Users after filtering current user:", filteredUsers.length);
+        console.log("filteredUsers", filteredUsers);
+        if (args.searchTerm) {
+            return filteredUsers.filter((user) =>
+                user.name.toLowerCase().includes(args.searchTerm!.toLowerCase())
+            );
+        }
+        console.log("filteredUsers", filteredUsers);
+        return filteredUsers;
+    },
+});
+
+// Debug query to see if ANY users exist (independent of auth)
+export const debugAllUsers = query({
+    args: {},
+    handler: async (ctx: QueryCtx) => {
+        return await ctx.db.query("users").collect();
+    },
+});

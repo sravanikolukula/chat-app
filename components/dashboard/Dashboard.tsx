@@ -1,24 +1,22 @@
-"use strict";
 "use client";
 
-import React, { useState, useEffect } from "react";
-import styles from "./Dashboard.module.css";
+import React, { useState } from "react";
 import Sidebar from "./Sidebar";
 import ChatArea from "./ChatArea";
 import RightSidebar from "./RightSidebar";
-import { User } from "./types";
+import { Conversation } from "./types";
 
 const Dashboard = () => {
-    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
 
     return (
-        <div className={styles.container}>
+        <div className="grid grid-cols-[25%_50%_25%] h-screen w-screen overflow-hidden bg-[var(--bg-main)]">
             <Sidebar
-                selectedUser={selectedUser}
-                onSelectUser={setSelectedUser}
+                selectedConversation={selectedConversation}
+                onSelectConversation={setSelectedConversation}
             />
-            <ChatArea selectedUser={selectedUser} />
-            <RightSidebar selectedUser={selectedUser} />
+            <ChatArea selectedConversation={selectedConversation} />
+            <RightSidebar selectedConversation={selectedConversation} />
         </div>
     );
 };

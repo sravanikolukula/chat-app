@@ -30,14 +30,11 @@ export default function Home() {
   }, [user, syncUserMutation]);
 
   return (
-    <>
-      <div style={{ position: "fixed", top: "1rem", right: "5rem", zIndex: 1000 }}>
-        <UserButton afterSignOutUrl="/" />
-      </div>
+    // <div className="test-red" style={{ backgroundColor: 'red', height: '100vh', display: 'flex', alignItems: 'center', justifyCenter: 'center', color: 'white', fontSize: '5rem', fontWeight: 'bold' }}>
+    //   hello from inline!
+    // </div>
+    <div className="min-h-screen flex items-center justify-center">
       <Dashboard />
-    </>
+    </div>
   );
 }
-
-
-

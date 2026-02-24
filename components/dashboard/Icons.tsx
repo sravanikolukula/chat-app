@@ -6,7 +6,8 @@ import {
     Phone,
     Video,
     MoreVertical,
-    CheckCheck
+    CheckCheck,
+    ChevronRight,
 } from "lucide-react";
 
 export const Icons = {
@@ -17,5 +18,6 @@ export const Icons = {
     Phone: Phone,
     Video: Video,
     Dots: MoreVertical,
-    DoubleCheck: CheckCheck
+    DoubleCheck: CheckCheck,
+    ChevronRight: ChevronRight
 };
