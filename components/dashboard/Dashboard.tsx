@@ -1,24 +1,33 @@
-"use strict";
 "use client";
 
-import React, { useState, useEffect } from "react";
-import styles from "./Dashboard.module.css";
+import React, { useState } from "react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import Sidebar from "./Sidebar";
 import ChatArea from "./ChatArea";
-import RightSidebar from "./RightSidebar";
-import { User } from "./types";
+import { Id } from "@/convex/_generated/dataModel";
 
 const Dashboard = () => {
-    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [selectedId, setSelectedId] = useState<Id<"conversations"> | null>(null);
+    const conversations = useQuery(api.conversations.list);
+
+    // Find the live version of the selected conversation
+    const selectedConversation = conversations?.find((c: any) => c._id === selectedId) || null;
 
     return (
-        <div className={styles.container}>
-            <Sidebar
-                selectedUser={selectedUser}
-                onSelectUser={setSelectedUser}
-            />
-            <ChatArea selectedUser={selectedUser} />
-            <RightSidebar selectedUser={selectedUser} />
+        <div className="grid grid-cols-1 md:grid md:grid-cols-[30%_70%] w-full h-full bg-[var(--bg-main)] md:p-2 overflow-hidden">
+            <div className={`${selectedId ? 'hidden md:block' : 'block'} w-full md:w-auto h-full min-h-0`}>
+                <Sidebar
+                    selectedId={selectedId}
+                    onSelectConversation={(conv) => setSelectedId(conv._id)}
+                />
+            </div>
+            <div className={`${selectedId ? 'block' : 'hidden md:block'} flex-1 h-full min-h-0`}>
+                <ChatArea
+                    selectedConversation={selectedConversation}
+                    onBack={() => setSelectedId(null)}
+                />
+            </div>
         </div>
     );
 };

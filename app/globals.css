@@ -1,5 +1,53 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+@source "../components";
+
+
+/* h1 {
+  background-color: blue !important;
+  color: white !important;
+  font-size: 5rem !important;
+} */
+
+.test-red {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ef4444;
+  /* red-600 */
+  color: white;
+  height: 100vh;
+  width: 100%;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  font-size: 8rem;
+}
+
+@theme {
+  --color-background: var(--bg-main);
+  --color-foreground: var(--text-primary);
+
+  --color-sidebar: var(--bg-sidebar);
+  --color-chat: var(--bg-chat);
+  --color-right: var(--bg-right);
+
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--accent-foreground);
+
+  --color-muted: var(--text-muted);
+  --color-muted-foreground: var(--text-secondary);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-online: var(--status-online);
+  --color-offline: var(--status-offline);
+
+  /* Spacing and other overrides can go here if needed */
+}
 
 :root {
   /* Light Mode Palette - Grayscale */
@@ -15,6 +63,12 @@
   --accent: hsl(0, 0%, 20%);
   --accent-foreground: hsl(0, 0%, 100%);
 
+  --bubble-received: hsl(0, 0%, 95%);
+  --bubble-received-text: hsl(0, 0%, 10%);
+
+  --bubble-sent: hsl(0, 0%, 20%);
+  --bubble-sent-text: hsl(0, 0%, 100%);
+
   --border: hsl(0, 0%, 90%);
   --input: hsl(0, 0%, 95%);
 
@@ -25,6 +79,19 @@
   --glass-border: hsla(0, 0%, 90%, 0.5);
 
   --card-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+
+  /* Shadcn standard variables fallback */
+  --background: var(--bg-main);
+  --foreground: var(--text-primary);
+  --primary: var(--accent);
+  --primary-foreground: var(--accent-foreground);
+  --ring: var(--accent);
+
+  --status-online: 142 76% 36%;
+  /* green */
+  --status-offline: 25 95% 53%;
+  /* orange */
+  --toggle-border: hsl(0, 0%, 80%);
 }
 
 [data-theme='dark'] {
@@ -39,7 +106,6 @@
   --text-muted: hsl(0, 0%, 60%);
 
   --accent: hsl(0, 0%, 100%);
-  /* Using White as accent for contrast */
   --accent-foreground: hsl(0, 0%, 10%);
 
   --bubble-received: hsl(0, 0%, 15%);
@@ -58,13 +124,47 @@
   --glass-border: hsla(0, 0%, 15%, 0.5);
 
   --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+
+  /* Shadcn standard variables fallback */
+  --background: var(--bg-main);
+  --foreground: var(--text-primary);
+  --primary: var(--accent);
+  --primary-foreground: var(--accent-foreground);
+  --ring: var(--accent);
+
+  --status-online: 142 70% 50%;
+  /* brighter green for dark */
+  --status-offline: 25 90% 60%;
+  /* brighter orange for dark */
+  --toggle-border: hsl(0, 0%, 50%);
 }
 
 * {
   box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100dvh;
+  width: 100vw;
   margin: 0;
   padding: 0;
+  overflow: hidden;
+  position: fixed;
+}
+
+body {
   font-family: 'Inter', sans-serif;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  transition: background 0.3s ease, color 0.3s ease;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root,
+__next {
+  height: 100%;
 }
 
 h1,
@@ -72,14 +172,6 @@ h2,
 h3,
 .brand {
   font-family: 'Outfit', sans-serif;
-}
-
-body {
-  background: var(--bg-main);
-  color: var(--text-primary);
-  height: 100vh;
-  overflow: hidden;
-  transition: background 0.3s ease, color 0.3s ease;
 }
 
 /* Custom Scrollbar */
@@ -98,4 +190,102 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
+}
+
+@keyframes dotSlide {
+
+  0%,
+  100% {
+    transform: translateY(-3px);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: translateY(3px);
+    opacity: 1;
+  }
+}
+
+.animate-dot-slide {
+  animation: dotSlide 1s infinite ease-in-out;
+}
+
+
+@keyframes zigzag {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  25% {
+    transform: translateY(-4px);
+  }
+
+  50% {
+    transform: translateY(2px);
+  }
+
+  75% {
+    transform: translateY(-2px);
+  }
+}
+
+.animate-zigzag {
+  animation: zigzag 0.8s ease-in-out infinite;
+}
+
+@keyframes zigzag {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  25% {
+    transform: translateY(-4px);
+  }
+
+  50% {
+    transform: translateY(2px);
+  }
+
+  75% {
+    transform: translateY(-2px);
+  }
+}
+
+.animate-zigzag {
+  animation: zigzag 0.8s ease-in-out infinite;
+}
+
+/* .custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 10px;
+} */
+
+
+
+
+/* Smooth thin scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
 }

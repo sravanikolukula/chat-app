@@ -23,7 +23,28 @@ export const syncUser = mutation({
             name: args.name,
             image: args.image,
             online: true,
+            lastSeen: Date.now(),
         });
+    },
+});
+
+export const updateStatus = mutation({
+    args: { online: v.boolean() },
+    handler: async (ctx: MutationCtx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) return;
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+            .unique();
+
+        if (user) {
+            await ctx.db.patch(user._id, {
+                online: args.online,
+                lastSeen: Date.now(),
+            });
+        }
     },
 });
 
@@ -39,5 +60,48 @@ export const currentUser = query({
             .query("users")
             .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
             .unique();
+    },
+});
+
+export const list = query({
+
+    args: {
+        searchTerm: v.optional(v.string()),
+    },
+    handler: async (ctx: QueryCtx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            console.log("No identity found in Convex query");
+            return [];
+        }
+
+        const users = await ctx.db
+            .query("users")
+            .collect();
+
+        const now = Date.now();
+        const ONLINE_THRESHOLD = 60000; // 60 seconds
+
+        const filteredUsers = users
+            .filter((user) => user.clerkId !== identity.subject)
+            .map((user) => ({
+                ...user,
+                online: user.online && (user.lastSeen ? (now - user.lastSeen < ONLINE_THRESHOLD) : false)
+            }));
+
+        if (args.searchTerm) {
+            return filteredUsers.filter((user) =>
+                user.name.toLowerCase().includes(args.searchTerm!.toLowerCase())
+            );
+        }
+        return filteredUsers;
+    },
+});
+
+// Debug query to see if ANY users exist (independent of auth)
+export const debugAllUsers = query({
+    args: {},
+    handler: async (ctx: QueryCtx) => {
+        return await ctx.db.query("users").collect();
     },
 });

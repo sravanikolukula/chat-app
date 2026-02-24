@@ -6,7 +6,15 @@ import {
     Phone,
     Video,
     MoreVertical,
-    CheckCheck
+    CheckCheck,
+    ChevronRight,
+    ChevronLeft,
+    Paperclip,
+    Copy,
+    Trash,
+    File,
+    Image,
+    Download
 } from "lucide-react";
 
 export const Icons = {
@@ -17,5 +25,13 @@ export const Icons = {
     Phone: Phone,
     Video: Video,
     Dots: MoreVertical,
-    DoubleCheck: CheckCheck
+    DoubleCheck: CheckCheck,
+    ChevronRight: ChevronRight,
+    Back: ChevronLeft,
+    Paperclip: Paperclip,
+    Copy: Copy,
+    Trash: Trash,
+    File: File,
+    Image: Image,
+    Download: Download
 };
