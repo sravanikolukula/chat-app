@@ -268,7 +268,7 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
                     ✨
                 </div>
                 <div className="text-center animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
-                    <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2 tracking-tight">Welcome to ChitChat</h2>
+                    <h2 className="text-4xl font-bold text-[var(--text-primary)] mb-2 tracking-tight">Welcome to ChitChat</h2>
                     <p className="text-[var(--text-muted)] text-sm">Select a contact from the sidebar to start a conversation</p>
                 </div>
             </main>
