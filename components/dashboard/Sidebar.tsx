@@ -41,15 +41,15 @@ const Sidebar = ({ selectedId, onSelectConversation }: SidebarProps) => {
         // <aside className="bg-[var(--bg-sidebar)] border-r border-[var(--border)] flex flex-col p-6 transition-all duration-300 ease-in-out rounded-l-md h-full">
         <aside className="bg-[var(--bg-sidebar)] border-r border-[var(--border)]
                  flex flex-col p-6 rounded-l-md
-                 h-full min-h-0 ">
+                 h-full min-h-0 overflow-hidden">
             {/* Header */}
-            <div className="mb-8 flex justify-between items-center">
+            <div className="mb-8 flex justify-between items-center shrink-0">
                 <h1 className="text-2xl font-bold text-[var(--accent)] tracking-tight">ChitChat</h1>
                 <ModeToggle />
             </div>
 
             {/* Search */}
-            <div className="relative mb-6">
+            <div className="relative mb-6 shrink-0">
                 <Icons.Search
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
                     size={18}
@@ -64,7 +64,7 @@ const Sidebar = ({ selectedId, onSelectConversation }: SidebarProps) => {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-4 mb-6 border-b border-[var(--border)] pb-2">
+            <div className="flex gap-4 mb-6 border-b border-[var(--border)] pb-2 shrink-0">
                 <div
                     onClick={() => setActiveTab("conversations")}
                     className={`pb-2 text-sm font-medium cursor-pointer relative transition-colors duration-200 ${activeTab === "conversations" ? "text-[var(--accent)] after:absolute after:bottom-[-9px] after:left-0 after:w-full after:h-[2px] after:bg-[var(--accent)] after:rounded-full" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
@@ -81,7 +81,7 @@ const Sidebar = ({ selectedId, onSelectConversation }: SidebarProps) => {
             </div>
 
             {/* List */}
-            <div className="flex-1 overflow-y-auto flex flex-col gap-2 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto min-h-0 flex flex-col gap-2 custom-scrollbar">
                 {activeTab === "conversations" ? (
                     conversations === undefined ? (
                         <div className="flex flex-col items-center justify-center h-32 text-[var(--text-muted)] animate-pulse">
@@ -175,7 +175,7 @@ const Sidebar = ({ selectedId, onSelectConversation }: SidebarProps) => {
             </div>
 
             {/* User Profile / Footer */}
-            <div className="mt-6 pt-4 border-t border-[var(--border)]">
+            <div className="mt-6 pt-4 border-t border-[var(--border)] shrink-0">
                 <div className="flex items-center gap-3 p-2 rounded-xl bg-[var(--input)]">
                     <UserButton showName={true} />
                 </div>

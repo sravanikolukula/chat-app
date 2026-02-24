@@ -15,14 +15,14 @@ const Dashboard = () => {
     const selectedConversation = conversations?.find((c: any) => c._id === selectedId) || null;
 
     return (
-        <div className="grid grid-cols-1 md:grid md:grid-cols-[30%_70%]  w-screen min-h-screen bg-[var(--bg-main)] md:p-2">
-            <div className={`${selectedId ? 'hidden md:block' : 'block'} w-full md:w-auto h-full`}>
+        <div className="grid grid-cols-1 md:grid md:grid-cols-[30%_70%] w-full h-full bg-[var(--bg-main)] md:p-2 overflow-hidden">
+            <div className={`${selectedId ? 'hidden md:block' : 'block'} w-full md:w-auto h-full min-h-0`}>
                 <Sidebar
                     selectedId={selectedId}
                     onSelectConversation={(conv) => setSelectedId(conv._id)}
                 />
             </div>
-            <div className={`${selectedId ? 'block' : 'hidden md:block'} flex-1 h-full`}>
+            <div className={`${selectedId ? 'block' : 'hidden md:block'} flex-1 h-full min-h-0`}>
                 <ChatArea
                     selectedConversation={selectedConversation}
                     onBack={() => setSelectedId(null)}

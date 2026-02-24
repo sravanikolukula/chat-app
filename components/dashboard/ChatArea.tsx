@@ -252,10 +252,10 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
     const otherMember = selectedConversation.otherMember;
 
     return (
-        <main className="flex-1 bg-[var(--bg-chat)] flex flex-col h-full relative rounded-r-md w-full md:w-auto overflow-y-scroll">
+        <main className="flex-1 bg-[var(--bg-chat)] flex flex-col h-full relative rounded-r-md w-full md:w-auto overflow-hidden">
             {/* Header */}
-            <header className="px-6 py-4 border-b border-[var(--border)] flex justify-between items-center bg-[var(--glass-bg)] backdrop-blur-md z-10 shrink-0">
-                <div className="flex items-center gap-4">
+            <header className="px-6 py-4 border-b border-[var(--border)] flex justify-between items-center bg-[var(--glass-bg)] backdrop-blur-md z-10 shrink-0 h-16">
+                <div className="flex items-center gap-4 ">
                     {/* Back Button for Mobile */}
                     <button
                         onClick={onBack}
@@ -264,7 +264,7 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
                         <Icons.Back size={24} />
                     </button>
 
-                    <div className="relative">
+                    <div className="relative ">
                         <img
                             src={otherMember?.image || "https://i.pravatar.cc/150"}
                             alt={otherMember?.name}
@@ -304,7 +304,7 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
             <div
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
-                className="flex-1 h-[calc(100%-120%)] overflow-y-scroll px-6 py-6 flex flex-col gap-6 custom-scrollbar relative "
+                className="flex-1 min-h-0 overflow-y-auto px-6 py-6 flex flex-col gap-6 custom-scrollbar relative"
             >
                 {messages === undefined ? (
                     <div className="flex-1 flex flex-col items-center justify-center text-[var(--text-muted)] animate-pulse">

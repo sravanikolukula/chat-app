@@ -141,11 +141,28 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  height: 100dvh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  position: fixed;
+}
+
 body {
   font-family: 'Inter', sans-serif;
   background: var(--bg-main);
   color: var(--text-primary);
   transition: background 0.3s ease, color 0.3s ease;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root,
+__next {
+  height: 100%;
 }
 
 h1,
