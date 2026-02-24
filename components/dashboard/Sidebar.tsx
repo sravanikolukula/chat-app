@@ -79,53 +79,87 @@ const Sidebar = ({ selectedConversation, onSelectConversation }: SidebarProps) =
             {/* List */}
             <div className="flex-1 overflow-y-auto flex flex-col gap-2 custom-scrollbar">
                 {activeTab === "conversations" ? (
-                    conversations?.map((conv) => (
-                        <div
-                            key={conv._id}
-                            onClick={() => onSelectConversation(conv)}
-                            className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors duration-200 group ${selectedConversation?._id === conv._id ? "bg-[var(--accent)] text-[var(--accent-foreground)]" : "hover:bg-[var(--input)]"}`}
-                        >
-                            <div className="relative">
-                                <img
-                                    src={conv.otherMember?.image || "https://i.pravatar.cc/150"}
-                                    alt={conv.otherMember?.name}
-                                    className="w-10 h-10 rounded-full object-cover bg-[var(--border)]"
-                                />
-                                <div className={`absolute bottom-[-2px] right-[-2px] w-3 h-3 rounded-full border-2 border-[var(--bg-sidebar)] ${conv.otherMember?.online ? "bg-[var(--status-online)]" : "bg-[var(--status-offline)]"}`}></div>
+                    conversations === undefined ? (
+                        <div className="flex flex-col items-center justify-center h-32 text-[var(--text-muted)] animate-pulse">
+                            <Icons.Dots size={24} className="mb-2" />
+                            <span className="text-xs font-medium">Loading chats...</span>
+                        </div>
+                    ) : conversations.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-48 text-center px-6">
+                            <div className="w-12 h-12 rounded-2xl bg-[var(--input)] flex items-center justify-center mb-4 text-[var(--text-muted)]">
+                                <Icons.Video size={20} />
                             </div>
+                            <span className="text-sm font-semibold text-[var(--text-primary)] mb-1">No conversations yet</span>
+                            <span className="text-[11px] text-[var(--text-muted)] leading-relaxed">
+                                Start a new chat from the Discover tab above
+                            </span>
+                        </div>
+                    ) : (
+                        conversations.map((conv) => (
+                            <div
+                                key={conv._id}
+                                onClick={() => onSelectConversation(conv)}
+                                className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors duration-200 group ${selectedConversation?._id === conv._id ? "bg-[var(--accent)] text-[var(--accent-foreground)]" : "hover:bg-[var(--input)]"}`}
+                            >
+                                <div className="relative">
+                                    <img
+                                        src={conv.otherMember?.image || "https://i.pravatar.cc/150"}
+                                        alt={conv.otherMember?.name}
+                                        className="w-10 h-10 rounded-full object-cover bg-[var(--border)]"
+                                    />
+                                    <div className={`absolute bottom-[-2px] right-[-2px] w-3 h-3 rounded-full border-2 border-[var(--bg-sidebar)] ${conv.otherMember?.online ? "bg-[var(--status-online)]" : "bg-[var(--status-offline)]"}`}></div>
+                                </div>
 
-                            <div className="flex-1 overflow-hidden">
-                                <div className="font-medium text-sm truncate">{conv.otherMember?.name}</div>
-                                <div className={`text-[11px] truncate ${selectedConversation?._id === conv._id ? "opacity-80" : "text-[var(--text-muted)]"}`}>
-                                    {conv.lastMessage?.body || "Start a conversation..."}
+                                <div className="flex-1 overflow-hidden">
+                                    <div className="font-medium text-sm truncate">{conv.otherMember?.name}</div>
+                                    <div className={`text-[11px] truncate ${selectedConversation?._id === conv._id ? "opacity-80" : "text-[var(--text-muted)]"}`}>
+                                        {conv.lastMessage?.body || "Start a conversation..."}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))
+                        ))
+                    )
                 ) : (
-                    filteredUsers?.map((user) => (
-                        <div
-                            key={user._id}
-                            onClick={() => handleSelectUser(user)}
-                            className="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors duration-200 hover:bg-[var(--input)]"
-                        >
-                            <div className="relative">
-                                <img
-                                    src={user.image}
-                                    alt={user.name}
-                                    className="w-10 h-10 rounded-full object-cover bg-[var(--border)]"
-                                />
-                                <div className={`absolute bottom-[-2px] right-[-2px] w-3 h-3 rounded-full border-2 border-[var(--bg-sidebar)] ${user.online ? "bg-[var(--status-online)]" : "bg-[var(--status-offline)]"}`}></div>
+                    filteredUsers === undefined ? (
+                        <div className="flex flex-col items-center justify-center h-32 text-[var(--text-muted)] animate-pulse">
+                            <Icons.Dots size={24} className="mb-2" />
+                            <span className="text-xs font-medium">Searching users...</span>
+                        </div>
+                    ) : filteredUsers.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-48 text-center px-6">
+                            <div className="w-12 h-12 rounded-2xl bg-[var(--input)] flex items-center justify-center mb-4 text-[var(--text-muted)]">
+                                <Icons.Search size={20} />
                             </div>
+                            <span className="text-sm font-semibold text-[var(--text-primary)] mb-1">No users found</span>
+                            <span className="text-[11px] text-[var(--text-muted)] leading-relaxed">
+                                {searchTerm ? `No results for "${searchTerm}"` : "Wait for others to join ChitChat!"}
+                            </span>
+                        </div>
+                    ) : (
+                        filteredUsers.map((user) => (
+                            <div
+                                key={user._id}
+                                onClick={() => handleSelectUser(user)}
+                                className="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors duration-200 hover:bg-[var(--input)]"
+                            >
+                                <div className="relative">
+                                    <img
+                                        src={user.image}
+                                        alt={user.name}
+                                        className="w-10 h-10 rounded-full object-cover bg-[var(--border)]"
+                                    />
+                                    <div className={`absolute bottom-[-2px] right-[-2px] w-3 h-3 rounded-full border-2 border-[var(--bg-sidebar)] ${user.online ? "bg-[var(--status-online)]" : "bg-[var(--status-offline)]"}`}></div>
+                                </div>
 
-                            <div className="flex-1 overflow-hidden">
-                                <div className="font-medium text-sm truncate">{user.name}</div>
-                                <div className="text-[11px] text-[var(--text-muted)]">
-                                    Click to message
+                                <div className="flex-1 overflow-hidden">
+                                    <div className="font-medium text-sm truncate">{user.name}</div>
+                                    <div className="text-[11px] text-[var(--text-muted)]">
+                                        Click to message
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))
+                        ))
+                    )
                 )}
             </div>
 

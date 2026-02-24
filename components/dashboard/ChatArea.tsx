@@ -106,36 +106,55 @@ const ChatArea = ({ selectedConversation }: ChatAreaProps) => {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-6 custom-scrollbar">
-                {messages?.map((msg: Message) => {
-                    const isMe = msg.senderId !== otherMember?._id;
-                    return (
-                        <div
-                            key={msg._id}
-                            className={`flex gap-3 max-w-[85%] items-end animate-in fade-in duration-300 ${isMe ? "self-end flex-row-reverse" : "self-start flex-row"}`}
-                        >
-                            <div className="shrink-0 mb-1">
-                                {isMe ? (
-                                    <div className="w-7 h-7 rounded-full bg-zinc-300 flex items-center justify-center text-[10px] font-bold text-black border border-white/20">ME</div>
-                                ) : (
-                                    <img
-                                        src={otherMember?.image || "https://i.pravatar.cc/150"}
-                                        alt=""
-                                        className="w-7 h-7 rounded-full object-cover bg-[var(--border)]"
-                                    />
-                                )}
-                            </div>
-                            <div className={`flex flex-col gap-1 ${isMe ? "items-end" : "items-start"}`}>
-                                <div className={`px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed shadow-sm ${isMe ? "bg-[var(--bubble-sent)] text-[var(--bubble-sent-text)] rounded-br-none" : "bg-[var(--bubble-received)] text-[var(--bubble-received-text)] rounded-bl-none"}`}>
-                                    {msg.body}
-                                </div>
-                                <div className="text-[9px] text-[var(--text-muted)] mt-0.5 flex items-center gap-1.5 uppercase font-medium tracking-wider">
-                                    {formatMessageTime(msg.createdAt)}
-                                    {isMe && <Icons.DoubleCheck size={12} className="text-[var(--status-online)]" />}
-                                </div>
-                            </div>
+                {messages === undefined ? (
+                    <div className="flex-1 flex flex-col items-center justify-center text-[var(--text-muted)] animate-pulse">
+                        <Icons.Dots size={24} className="mb-2" />
+                        <span className="text-xs font-medium">Loading messages...</span>
+                    </div>
+                ) : messages.length === 0 ? (
+                    <div className="flex-1 flex flex-col items-center justify-center text-center px-12">
+                        <div className="w-16 h-16 rounded-2xl bg-[var(--input)] flex items-center justify-center mb-6 text-3xl shadow-sm">
+                            👋
                         </div>
-                    );
-                })}
+                        <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2">
+                            Say hello to {otherMember?.name}!
+                        </h3>
+                        <p className="text-sm text-[var(--text-muted)] max-w-[240px] leading-relaxed">
+                            Every great friendship starts with a single message. Why not send one now?
+                        </p>
+                    </div>
+                ) : (
+                    messages.map((msg: Message) => {
+                        const isMe = msg.senderId !== otherMember?._id;
+                        return (
+                            <div
+                                key={msg._id}
+                                className={`flex gap-3 max-w-[85%] items-end animate-in fade-in duration-300 ${isMe ? "self-end flex-row-reverse" : "self-start flex-row"}`}
+                            >
+                                <div className="shrink-0 mb-1">
+                                    {isMe ? (
+                                        <div className="w-7 h-7 rounded-full bg-zinc-300 flex items-center justify-center text-[10px] font-bold text-black border border-white/20">ME</div>
+                                    ) : (
+                                        <img
+                                            src={otherMember?.image || "https://i.pravatar.cc/150"}
+                                            alt=""
+                                            className="w-7 h-7 rounded-full object-cover bg-[var(--border)]"
+                                        />
+                                    )}
+                                </div>
+                                <div className={`flex flex-col gap-1 ${isMe ? "items-end" : "items-start"}`}>
+                                    <div className={`px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed shadow-sm ${isMe ? "bg-[var(--bubble-sent)] text-[var(--bubble-sent-text)] rounded-br-none" : "bg-[var(--bubble-received)] text-[var(--bubble-received-text)] rounded-bl-none"}`}>
+                                        {msg.body}
+                                    </div>
+                                    <div className="text-[9px] text-[var(--text-muted)] mt-0.5 flex items-center gap-1.5 uppercase font-medium tracking-wider">
+                                        {formatMessageTime(msg.createdAt)}
+                                        {isMe && <Icons.DoubleCheck size={12} className="text-[var(--status-online)]" />}
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })
+                )}
                 <div ref={messagesEndRef} />
             </div>
 
