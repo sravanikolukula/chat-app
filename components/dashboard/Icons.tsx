@@ -11,7 +11,10 @@ import {
     ChevronLeft,
     Paperclip,
     Copy,
-    Trash
+    Trash,
+    File,
+    Image,
+    Download
 } from "lucide-react";
 
 export const Icons = {
@@ -27,5 +30,8 @@ export const Icons = {
     Back: ChevronLeft,
     Paperclip: Paperclip,
     Copy: Copy,
-    Trash: Trash
+    Trash: Trash,
+    File: File,
+    Image: Image,
+    Download: Download
 };

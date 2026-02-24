@@ -5,6 +5,10 @@ export const send = mutation({
     args: {
         conversationId: v.id("conversations"),
         body: v.string(),
+        messageType: v.optional(v.union(v.literal("text"), v.literal("image"), v.literal("file"))),
+        contentUrl: v.optional(v.string()),
+        fileName: v.optional(v.string()),
+        fileSize: v.optional(v.string()),
     },
     handler: async (ctx: MutationCtx, args) => {
         const identity = await ctx.auth.getUserIdentity();
@@ -25,6 +29,10 @@ export const send = mutation({
             conversationId: args.conversationId,
             senderId: user._id,
             body: args.body,
+            messageType: args.messageType || "text",
+            contentUrl: args.contentUrl,
+            fileName: args.fileName,
+            fileSize: args.fileSize,
             createdAt: Date.now(),
             readBy: [user._id],
         });

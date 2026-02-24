@@ -24,6 +24,10 @@ export interface Message {
     conversationId: Id<"conversations">;
     senderId: Id<"users">;
     body: string;
+    messageType?: "text" | "image" | "file";
+    contentUrl?: string;
+    fileName?: string;
+    fileSize?: string;
     createdAt: number;
     deleted?: boolean;
     reactions?: {

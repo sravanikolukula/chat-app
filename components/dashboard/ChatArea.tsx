@@ -40,6 +40,7 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
     const [showScrollButton, setShowScrollButton] = useState(false);
     const [isAtBottom, setIsAtBottom] = useState(true);
     const messages = useQuery(api.messages.list, selectedConversation ? { conversationId: selectedConversation._id } : "skip");
+    const currentUser = useQuery(api.users.currentUser);
     const sendMessage = useMutation(api.messages.send);
     const markRead = useMutation(api.messages.markRead);
     const toggleReaction = useMutation(api.messages.toggleReaction);
@@ -47,7 +48,9 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
     const setTyping = useMutation(api.conversations.setTyping);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -129,10 +132,106 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
             await sendMessage({
                 conversationId: selectedConversation._id,
                 body: messageBody,
+                messageType: "text",
             });
             setMessageBody("");
         } catch (error) {
             console.error("Error sending message:", error);
+        }
+    };
+
+    // const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const file = e.target.files?.[0];
+    //     if (!file || !selectedConversation) return;
+
+    //     setIsUploading(true);
+    //     try {
+    //         const formData = new FormData();
+    //         formData.append("file", file);
+    //         formData.append("upload_preset", "ml_default"); // Default preset, usually needs to be configured
+
+    //         const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "demo";
+    //         console.log("Cloud name:", cloudName);
+    //         const response = await fetch(
+    //             `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
+    //             {
+    //                 method: "POST",
+    //                 body: formData,
+    //             }
+    //         );
+    //         console.log("response", response);
+    //         const data = await response.json();
+    //         if (data.secure_url) {
+    //             const isImage = file.type.startsWith("image/");
+    //             await sendMessage({
+    //                 conversationId: selectedConversation._id,
+    //                 body: isImage ? "Sent an image" : `Sent a file: ${file.name}`,
+    //                 messageType: isImage ? "image" : "file",
+    //                 contentUrl: data.secure_url,
+    //                 fileName: file.name,
+    //                 fileSize: (file.size / 1024 / 1024).toFixed(2) + " MB",
+    //             });
+    //         }
+    //     } catch (error) {
+    //         console.error("Error uploading file:", error);
+    //     } finally {
+    //         setIsUploading(false);
+    //         if (fileInputRef.current) fileInputRef.current.value = "";
+    //     }
+    // };
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !selectedConversation) return;
+
+        setIsUploading(true);
+
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            // Use env variable or fallback to ml_default
+            const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "ml_default";
+            formData.append("upload_preset", uploadPreset);
+
+            const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+
+            if (!cloudName) {
+                throw new Error("Cloudinary Cloud Name is not defined in environment variables.");
+            }
+
+            const response = await fetch(
+                `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
+                {
+                    method: "POST",
+                    body: formData,
+                }
+            );
+
+            const data = await response.json();
+            console.log("Cloudinary response:", data);
+
+            if (!response.ok) {
+                throw new Error(data.error?.message || "Upload failed");
+            }
+
+            if (data.secure_url) {
+                const isImage = file.type.startsWith("image/");
+
+                await sendMessage({
+                    conversationId: selectedConversation._id,
+                    body: isImage ? "Sent an image" : `Sent a file: ${file.name}`,
+                    messageType: isImage ? "image" : "file",
+                    contentUrl: data.secure_url,
+                    fileName: file.name,
+                    fileSize: (file.size / 1024 / 1024).toFixed(2) + " MB",
+                });
+            }
+
+        } catch (error) {
+            console.error("Error uploading file:", error);
+        } finally {
+            setIsUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = "";
         }
     };
 
@@ -245,7 +344,11 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
                             >
                                 <div className="shrink-0 mb-1">
                                     {isMe ? (
-                                        <div className="w-7 h-7 rounded-full bg-zinc-300 flex items-center justify-center text-[10px] font-bold text-black border border-white/20">ME</div>
+                                        <img
+                                            src={currentUser?.image || "https://i.pravatar.cc/150"}
+                                            alt=""
+                                            className="w-7 h-7 rounded-full object-cover border border-white/20"
+                                        />
                                     ) : (
                                         <img
                                             src={otherMember?.image || "https://i.pravatar.cc/150"}
@@ -289,8 +392,52 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
                                         </div>
                                     )}
 
-                                    <div className={`px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed shadow-sm transition-all ${msg.deleted ? "bg-zinc-100 dark:bg-zinc-900 text-zinc-400 italic border border-zinc-200 dark:border-zinc-800" : isMe ? "bg-[var(--bubble-sent)] text-[var(--bubble-sent-text)] rounded-br-none" : "bg-[var(--bubble-received)] text-[var(--bubble-received-text)] rounded-bl-none"}`}>
-                                        {msg.deleted ? "This message was deleted" : msg.body}
+                                    <div className={`${(msg.messageType === "text" || !msg.messageType || msg.deleted) ? "px-4 py-2.5" : "p-1"} rounded-2xl text-[13px] leading-relaxed shadow-sm transition-all ${msg.deleted ? "bg-zinc-100 dark:bg-zinc-900 text-zinc-400 italic border border-zinc-200 dark:border-zinc-800" : isMe ? "bg-[var(--bubble-sent)] text-[var(--bubble-sent-text)] rounded-br-none" : "bg-[var(--bubble-received)] text-[var(--bubble-received-text)] rounded-bl-none"}`}>
+                                        {msg.deleted ? (
+                                            "This message was deleted"
+                                        ) : msg.messageType === "image" ? (
+                                            <div className="flex flex-col max-w-[320px]">
+                                                <div className="relative rounded-xl overflow-hidden border border-black/5 dark:border-white/5 shadow-sm group/img-cont">
+                                                    <img
+                                                        src={msg.contentUrl}
+                                                        alt="Sent image"
+                                                        className="w-full h-auto max-h-[400px] object-cover cursor-pointer hover:scale-[1.02] transition-transform duration-300"
+                                                        onClick={() => window.open(msg.contentUrl, "_blank")}
+                                                        loading="lazy"
+                                                    />
+                                                    <div className="absolute inset-0 bg-black/0 group-hover/img-cont:bg-black/5 transition-colors pointer-events-none" />
+                                                </div>
+                                                {msg.body && msg.body !== "Sent an image" && (
+                                                    <span className="px-4 py-2 text-[13px] inline-block">{msg.body}</span>
+                                                )}
+                                            </div>
+                                        ) : msg.messageType === "file" ? (
+                                            <div className="flex flex-col min-w-[240px]">
+                                                <div className={`flex items-center gap-3 ${isMe ? "bg-black/20" : "bg-zinc-100/80 dark:bg-zinc-800/50"} p-3 rounded-xl border ${isMe ? "border-white/10" : "border-black/5 dark:border-white/5"} backdrop-blur-sm shadow-inner transition-colors`}>
+                                                    <div className="w-10 h-10 rounded-lg bg-(--accent) flex items-center justify-center text-white shadow-sm">
+                                                        <Icons.File size={20} />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className={`font-semibold truncate ${isMe ? "text-white" : "text-(--text-primary)"}`}>{msg.fileName}</div>
+                                                        <div className={`text-[10px] ${isMe ? "text-white/60" : "text-(--text-muted)"}`}>{msg.fileSize}</div>
+                                                    </div>
+                                                    <a
+                                                        href={msg.contentUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        download={msg.fileName}
+                                                        className={`p-2 rounded-lg transition-all ${isMe ? "hover:bg-white/10 text-white/80 hover:text-white" : "hover:bg-black/5 dark:hover:bg-white/5 text-(--text-muted) hover:text-(--text-primary)"}`}
+                                                    >
+                                                        <Icons.Download size={18} />
+                                                    </a>
+                                                </div>
+                                                {msg.body && msg.body !== `Sent a file: ${msg.fileName}` && (
+                                                    <span className={`px-4 py-2 ${isMe ? "text-white/90" : "text-(--text-primary)"}`}>{msg.body}</span>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            msg.body
+                                        )}
                                     </div>
 
                                     {/* Reaction Badges */}
@@ -370,10 +517,20 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
                         {/* File Attachment Button */}
                         <button
                             type="button"
-                            className="absolute left-4 p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors rounded-xl hover:bg-[var(--border)]/30 z-10"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isUploading}
+                            className={`absolute left-4 p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors rounded-xl hover:bg-[var(--border)]/30 z-10 ${isUploading ? "animate-pulse" : ""}`}
                         >
-                            <Icons.Paperclip size={20} />
+                            {isUploading ? <Icons.Dots size={20} /> : <Icons.Paperclip size={20} />}
                         </button>
+
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileUpload}
+                            className="hidden"
+                            accept="image/*,.pdf,.doc,.docx,.txt"
+                        />
 
                         <input
                             type="text"
