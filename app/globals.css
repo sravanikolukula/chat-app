@@ -172,3 +172,70 @@ h3,
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
+
+@keyframes dotSlide {
+
+  0%,
+  100% {
+    transform: translateY(-3px);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: translateY(3px);
+    opacity: 1;
+  }
+}
+
+.animate-dot-slide {
+  animation: dotSlide 1s infinite ease-in-out;
+}
+
+
+@keyframes zigzag {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  25% {
+    transform: translateY(-4px);
+  }
+
+  50% {
+    transform: translateY(2px);
+  }
+
+  75% {
+    transform: translateY(-2px);
+  }
+}
+
+.animate-zigzag {
+  animation: zigzag 0.8s ease-in-out infinite;
+}
+
+@keyframes zigzag {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  25% {
+    transform: translateY(-4px);
+  }
+
+  50% {
+    transform: translateY(2px);
+  }
+
+  75% {
+    transform: translateY(-2px);
+  }
+}
+
+.animate-zigzag {
+  animation: zigzag 0.8s ease-in-out infinite;
+}

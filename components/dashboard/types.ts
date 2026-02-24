@@ -15,6 +15,7 @@ export interface Conversation {
     groupName?: string;
     otherMember?: User | null;
     lastMessage?: Message | null;
+    typing?: Id<"users">[];
 }
 
 export interface Message {

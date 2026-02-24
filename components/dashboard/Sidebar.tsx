@@ -108,7 +108,7 @@ const Sidebar = ({ selectedId, onSelectConversation }: SidebarProps) => {
                                         alt={conv.otherMember?.name}
                                         className="w-10 h-10 rounded-full object-cover bg-[var(--border)]"
                                     />
-                                    <div className={`absolute bottom-[-2px] right-[-2px] w-3 h-3 rounded-full border-2 ${conv.otherMember?.online ? "bg-[hsl(var(--status-online))] border-[var(--bg-sidebar)]" : "bg-transparent border-[var(--border)]"}`}></div>
+                                    <div className={`absolute bottom-[-2px] right-[-2px] w-3 h-3 rounded-full border-2 transition-all ${conv.otherMember?.online ? "bg-[hsl(var(--status-online))] border-background" : "bg-transparent border-border border-gray-950 dark:border-gray-300"}`}></div>
                                 </div>
 
                                 <div className="flex-1 overflow-hidden">
@@ -149,7 +149,7 @@ const Sidebar = ({ selectedId, onSelectConversation }: SidebarProps) => {
                                         alt={user.name}
                                         className="w-10 h-10 rounded-full object-cover bg-[var(--border)]"
                                     />
-                                    <div className={`absolute bottom-[-2px] right-[-2px] w-3 h-3 rounded-full border-2 ${user.online ? "bg-[hsl(var(--status-online))] border-[var(--bg-sidebar)]" : "bg-transparent border-[var(--border)]"}`}></div>
+                                    <div className={`absolute bottom-[-2px] right-[-2px] w-3 h-3 rounded-full border-2 transition-all ${user.online ? "bg-[hsl(var(--status-online))] border-background" : "bg-transparent border-border border-gray-950 dark:border-gray-300"}`}></div>
                                 </div>
 
                                 <div className="flex-1 overflow-hidden">

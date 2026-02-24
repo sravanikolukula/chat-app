@@ -37,7 +37,9 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
     const [messageBody, setMessageBody] = useState("");
     const messages = useQuery(api.messages.list, selectedConversation ? { conversationId: selectedConversation._id } : "skip");
     const sendMessage = useMutation(api.messages.send);
+    const setTyping = useMutation(api.conversations.setTyping);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -52,6 +54,10 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
         if (!messageBody.trim() || !selectedConversation) return;
 
         try {
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+                setTyping({ conversationId: selectedConversation._id, isTyping: false });
+            }
             await sendMessage({
                 conversationId: selectedConversation._id,
                 body: messageBody,
@@ -181,6 +187,29 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
                 <div ref={messagesEndRef} />
             </div>
 
+            {/* Typing Indicator */}
+            {otherMember?._id && selectedConversation?.typing?.includes(otherMember._id) && (
+                <div className="px-8 py-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="flex items-center gap-2 text-[11px] text-[var(--text-muted)] font-medium bg-[var(--input)]/50 dark:bg-zinc-800/50 w-fit px-3 py-1.5 rounded-full border border-[var(--border)]/20 shadow-sm">
+                        typing
+                        <div className="flex gap-1.5 ml-1">
+                            <span className="w-1 h-1 rounded-full bg-[var(--accent)] animate-dot-slide"></span>
+                            <span className="w-1 h-1 rounded-full bg-[var(--accent)] animate-dot-slide [animation-delay:-0.5s]"></span>
+                            <span className="w-1 h-1 rounded-full bg-[var(--accent)] animate-dot-slide [animation-delay:-0.10s]"></span>
+                        </div>
+
+                    </div>
+                    {/* <div className="flex items-center text-sm text-muted-foreground">
+                        is typing
+                        <div className="flex gap-1.5 ml-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--accent))] animate-zigzag"></span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--accent))] animate-zigzag [animation-delay:0.15s]"></span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--accent))] animate-zigzag [animation-delay:0.3s]"></span>
+                        </div>
+                    </div> */}
+                </div>
+            )}
+
             {/* Input Area */}
             <div className="p-6 bg-[var(--bg-chat)] shrink-0 flex justify-center">
                 <form
@@ -201,7 +230,19 @@ const ChatArea = ({ selectedConversation, onBack }: ChatAreaProps) => {
                             placeholder="Type a message..."
                             className="w-full pl-14 pr-14 py-4 rounded-[24px] border border-[var(--border)] bg-[var(--input)] text-[var(--text-primary)] outline-none focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent)]/5 transition-all duration-300 shadow-sm placeholder:text-[var(--text-muted)]/60"
                             value={messageBody}
-                            onChange={(e) => setMessageBody(e.target.value)}
+                            onChange={(e) => {
+                                setMessageBody(e.target.value);
+                                if (!selectedConversation) return;
+
+                                // Send typing start
+                                setTyping({ conversationId: selectedConversation._id, isTyping: true });
+
+                                // Reset timeout
+                                if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+                                typingTimeoutRef.current = setTimeout(() => {
+                                    setTyping({ conversationId: selectedConversation._id, isTyping: false });
+                                }, 2000);
+                            }}
                         />
 
                         {/* Integrated Send Button */}

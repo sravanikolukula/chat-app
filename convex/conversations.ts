@@ -99,3 +99,34 @@ export const list = query({
         return results;
     },
 });
+
+export const setTyping = mutation({
+    args: {
+        conversationId: v.id("conversations"),
+        isTyping: v.boolean(),
+    },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) return;
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+            .unique();
+        if (!user) return;
+
+        const conversation = await ctx.db.get(args.conversationId);
+        if (!conversation) return;
+
+        let typing = conversation.typing || [];
+        if (args.isTyping) {
+            if (!typing.includes(user._id)) {
+                typing.push(user._id);
+            }
+        } else {
+            typing = typing.filter((id) => id !== user._id);
+        }
+
+        await ctx.db.patch(args.conversationId, { typing });
+    },
+});
